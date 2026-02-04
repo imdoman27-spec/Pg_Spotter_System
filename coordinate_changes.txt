@@ -1,0 +1,41 @@
+// Add these lines near the top where other POST values are collected
+$latitude = $_POST['latitude'] ?? null;
+$longitude = $_POST['longitude'] ?? null;
+
+// Validate coordinates
+if ($latitude !== null && $longitude !== null) {
+    $latitude = floatval($latitude);
+    $longitude = floatval($longitude);
+    if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+        $_SESSION['error_message'] = "Invalid coordinates provided.";
+        header("Location: list_pg.php" . ($is_update_mode ? "?edit=$pg_id_to_edit" : ""));
+        exit;
+    }
+}
+
+// Add to the SQL for UPDATE query (find the UPDATE query and add these lines)
+$sql_pg = "UPDATE pg_listings SET 
+           pg_name = :pg_name, pg_type = :pg_type, location_city = :location_city, 
+           address = :address, num_rooms = :num_rooms, description = :description,
+           rent_per_person = :rent_per_person, security_deposit = :security_deposit, 
+           notice_period_days = :notice_period_days, owner_contact_name = :owner_contact_name, 
+           owner_contact_number = :owner_contact_number, owner_email = :owner_email,
+           latitude = :latitude, longitude = :longitude
+           WHERE pg_id = :pg_id AND owner_id = :owner_id";
+
+// Add to the SQL for INSERT query (find the INSERT query and add these fields)
+$sql_pg = "INSERT INTO pg_listings (
+    owner_id, pg_name, pg_type, location_city, address, num_rooms, description,
+    rent_per_person, security_deposit, notice_period_days,
+    owner_contact_name, owner_contact_number, owner_email,
+    latitude, longitude
+) VALUES (
+    :owner_id, :pg_name, :pg_type, :location_city, :address, :num_rooms, :description,
+    :rent_per_person, :security_deposit, :notice_period_days,
+    :owner_contact_name, :owner_contact_number, :owner_email,
+    :latitude, :longitude
+)";
+
+// Add these lines where other parameters are bound
+$stmt_pg->bindParam(':latitude', $latitude);
+$stmt_pg->bindParam(':longitude', $longitude);

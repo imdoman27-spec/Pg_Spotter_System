@@ -1,0 +1,1 @@
+after use external css and js for header and details
